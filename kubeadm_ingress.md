@@ -173,7 +173,7 @@ data:
       - 10.121.177.40-10.121.177.45
 ```
 
-_Note_: You should change this line `- 10.121.177.40-10.121.177.45` to the range of the available IPs in your LAN where you setup the k8s cluster.
+_Note_: Assume your k8s cluster is running on a machine with IP `10.121.177.31`. You should change this line `- 10.121.177.40-10.121.177.45` to the range of the available IPs in your LAN where you setup the k8s cluster.
 
 ```bash
 # Create metallb configmap
@@ -196,6 +196,7 @@ curl 10.121.177.40 # This should return nginx page
 curl 10.121.177.40/green # This should return 404 Not found
 curl localdev.me # This should return nginx page
 curl localdev.me/green # This should return green page
+# Open browser in another machine in LAN with IP 10.121.177.58, access 10.121.177.40, it should show nginx page
 
 # Cleanup
 # Revert change in /etc/hosts
@@ -227,7 +228,7 @@ kubectl get ns delete-me-ns -o json | jq '.spec.finalizers=[]' | curl -X PUT htt
 
 # Delete 'Terminating' pod
 kubectl delete pod delete-me-pod -n delete-me-ns --grace-period=0 --force
-# Double check docker containers to see if it still runs
+# Double check docker containers to see if it still runs and stop it
 docker ps
 docker container stop <container_id>
 ```
