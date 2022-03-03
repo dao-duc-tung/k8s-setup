@@ -40,3 +40,11 @@ Wait for few seconds, and verify:
 kubectl top pods
 kubectl top nodes
 ```
+
+To troubleshoot/check error of the metrics server, run:
+
+```bash
+kubectl describe apiservice v1beta1.metrics.k8s.io
+# Check the Status field
+# Note: name v1beta1.metrics.k8s.io get from the above yaml file, in APIService component
+```
