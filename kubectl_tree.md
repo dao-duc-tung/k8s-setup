@@ -9,5 +9,5 @@ kubectl krew install tree
 # Enable metrics server. Refer to kubeadm_metrics_server.md
 
 # Use tree to show all the child components of a deployment
-kubectrl tree deployment <deployment-name>
+kubectl tree deploy <deployment-name>
 ```
