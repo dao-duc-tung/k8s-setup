@@ -1,12 +1,8 @@
-# Kubectl common processes
+# Kubectl common cli
 
 ## General
 
-- [Configuration Best Practices](https://kubernetes.io/docs/concepts/configuration/overview/)
 - [kubectl cheat sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
-- [Ports and Protocols](https://kubernetes.io/docs/reference/ports-and-protocols/)
-- [Recommended Labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/)
-- [guestbook-all-in-one.yaml](https://github.com/kubernetes/examples/blob/master/guestbook/all-in-one/guestbook-all-in-one.yaml)
 
 ```bash
 # List all k8s resources, with shortnames, api version, etc
@@ -20,6 +16,7 @@ kubectl get svc
 kubectl get deploy
 kubectl get ing
 kubectl get job
+kubectl get ep
 kubectl get ds
 kubectl get apiservice
 
@@ -57,7 +54,7 @@ kubectl describe svc <svc-name>
 # Endpoints: List of IPs of all the pods linked to this service
 ```
 
-## Deployments
+## Deployment
 
 [Deployment document](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 
