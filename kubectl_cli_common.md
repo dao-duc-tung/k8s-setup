@@ -7,8 +7,9 @@
 ```bash
 # List all k8s resources, with shortnames, api version, etc
 kubectl api-resources
-kubectl api-resources | grep apps
-kubectl api-resources | grep apps | less
+kubectl api-resources | grep apps # to look up
+kubectl api-resources | grep apps | less # to show less
+kubectl api-resources | grep apps | less -S # to chop long lines
 
 # Get common resources
 kubectl get pod
@@ -19,6 +20,7 @@ kubectl get job
 kubectl get ep
 kubectl get ds
 kubectl get apiservice
+kubectl get crd
 
 # watch the change of deploy
 watch kubectl get pod

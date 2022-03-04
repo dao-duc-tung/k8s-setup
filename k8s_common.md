@@ -9,7 +9,9 @@
 
 ## Pod
 
-- **Sidecar** concept: A sidecar is just a container that runs on the same Pod as the application container. It shares the same volume and network as the main container, helps, and enhances how the application operates. E.g: log shippers, log watchers, monitoring agents among others.
+- **Sidecar** concept: A sidecar is just a container that runs on the same Pod as the application container. It shares the same volume and network as the main container, helps, and enhances how the application operates by directly intercepting all traffic. E.g: log shippers, log watchers, monitoring agents among others.
+
+- Each Pod has a single IP address assigned from the Pod CIDR range of its node. This IP address is shared by all containers running within the Pod. To communicate between containers in the same pod, check [this](https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/).
 
 ## Service
 
@@ -409,3 +411,11 @@ cat <yaml-file> | linkerd inject --manual -
 # before passing to k8s
 kubectl annotate namespace default linkerd.io/inject=enabled
 ```
+
+## Custom resource definition (CRD)
+
+- [CRD document](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
+- [Extend k8s using CRD document](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/)
+- [Operator pattern document](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+  - Operators are software extensions to k8s that make use of CRDs to manage apps and their components. With Operators you can stop treating an application as a collection of primitives like Pods, Deployments, Services or ConfigMaps, but instead as a **single** object that only exposes the knobs that make sense for the application.
+  - [Operator Hub](https://operatorhub.io/)
