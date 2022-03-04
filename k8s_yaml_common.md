@@ -49,3 +49,40 @@ containers:
       successThreshold: 1
       failureThreshold: 1
 ```
+
+```yaml
+# resources requests and limits
+# cpu 100m means 100 millicores = 1/10 cores
+
+# For requests
+# It's like treating requests as sizes of pods
+# k8s finds the node that fits different pods to ensure maximum usage of all nodes
+# This operation is called bin packing.
+# By default, requests are set to 0. This means that the pod can be assigned to any node.
+# That node might not find enough resources on the assigned node. By this reason, you should
+# always set the requests. You can run load test, or guess and adjust repeatedly,
+# or use k8s's feature called Vertical Pod Auto-scaler which watchs and adjusts for you.
+
+# For limits
+# For the CPU to use 1/10 cores, the thread will be forced to run at maximum 10% of time
+# For the memory, if the container cannot allocate memory, then it's just crashed
+# Setting CPU limit doesn't make sense because the CPU can just use cycles that nobody use.
+# If 2 pods want to use more CPU, then one of them will be killed and throttled back
+# to the request amount. So we don't need to set the CPU limit.
+# Setting memory limit is very important. If 2 pods use more than total memory,
+# the OOM (out of memory) killer will kill something randomly,
+# and might cause the node to be crashed. Hence, we should set the limit
+# to be the same as the request to make sure this never happens.
+
+# If no node can fulfill the pod's requests/limits, the pod will never be assigned to a node
+containers:
+  - name: web
+    image: nginx:1.18.0
+    resources:
+      requests:
+        memory: 64Mi
+        cpu: 100m
+      limits:
+        memory: 1Gi
+        cpu: 1
+```
