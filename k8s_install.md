@@ -102,4 +102,16 @@ kubectl ctx
 kubectl ns
 # Get current ns
 kubectl ns -c
+
+# Install service mesh linkerd. Ref: https://linkerd.io/2.11/getting-started/#
+curl --proto '=https' --tlsv1.2 -sSfL https://run.linkerd.io/install | sh
+# Add linkerd to PATH
+linkerd version
+linkerd check --pre
+linkerd install | kubectl apply -f -
+linkerd check
+# Install linkerd dashboard
+linkerd viz install | kubectl apply -f -
+linkerd viz check
+linkerd viz dashboard
 ```

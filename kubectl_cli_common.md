@@ -46,12 +46,17 @@ kubectl create namespace team1
 kubectl config set-context --current --namespace=team1
 # Use kubectl ctx to get contexts
 # Use kubectl ns to get namespaces
+
+# Add annotation to a namespace
+# Eg: kubectl annotate namespace default linkerd.io/inject=enabled
+kubectl annotate namespace <ns-name> <annotation>
 ```
 
 ## Pod
 
 ```bash
 kubectl get pod -o wide
+# READY column: shows number of ready containers/all containers
 # IP column: shows the IP assigned to each pod
 ```
 
@@ -75,6 +80,9 @@ kubectl describe svc <svc-name>
 [Deployment document](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 
 ```bash
+kubectl get deploy
+# READY column: shows number of ready pods/all replicas
+
 # rollout
 kubectl rollout status deploy/<deploy-name>
 kubectl rollout pause deploy/<deploy-name>

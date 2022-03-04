@@ -9,6 +9,8 @@
 
 ## Pod
 
+- **Sidecar** concept: A sidecar is just a container that runs on the same Pod as the application container. It shares the same volume and network as the main container, helps, and enhances how the application operates. E.g: log shippers, log watchers, monitoring agents among others.
+
 ## Service
 
 ## Deployment
@@ -391,4 +393,19 @@ roleRef:
   kind: ClusterRole
   name: node-reader
   apiGroup: rbac.authorization.k8s.io
+```
+
+## Service mesh
+
+- [Kubernetes Service Mesh: A Comparison of Istio, Linkerd, and Consul](https://platform9.com/blog/kubernetes-service-mesh-a-comparison-of-istio-linkerd-and-consul/)
+- [Linkerd Service mesh](https://linkerd.io/what-is-a-service-mesh/)
+
+```bash
+# Run this to check how linkerd inject YAML
+cat <yaml-file> | linkerd inject --manual -
+
+# Instead, run this to enable linkerd injection every time we deploy a pod in namespace 'default'
+# linkerd intercepts the processing of creating the pod and inject some YAML into the pod's yaml
+# before passing to k8s
+kubectl annotate namespace default linkerd.io/inject=enabled
 ```
