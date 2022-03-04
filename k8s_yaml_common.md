@@ -252,3 +252,12 @@ spec:
       configMap:
         name: website
 ```
+
+## Secret
+
+```yaml
+# Ref: https://kubernetes.io/docs/concepts/configuration/secret/
+# Common secret type 1: Generic - use it same as ConfigMap
+# Common secret type 2: TLS - provded for user's convenience, to ensure the consistency
+# of Secret format.
+```
