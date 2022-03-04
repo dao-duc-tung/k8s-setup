@@ -32,6 +32,22 @@ kubectl diff -f <yaml-file>
 kubectl tree deploy <deploy-name>
 ```
 
+## Namespace
+
+- [Namespace document](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+- Namespace is just for grouping resources, like a folder. It can be useful when using with NetworkPolicy to grant permission for a group of resources.
+- When deleting a namespace, all of its resources will be deleted also.
+- Some resources can't be put in a namespace like nodes, persisten volumes, etc. They're called cluster resources.
+
+```bash
+# Create ns
+kubectl create namespace team1
+# permanently save the namespace for all subsequent kubectl commands in that context
+kubectl config set-context --current --namespace=team1
+# Use kubectl ctx to get contexts
+# Use kubectl ns to get namespaces
+```
+
 ## Pod
 
 ```bash

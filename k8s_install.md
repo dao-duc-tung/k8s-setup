@@ -81,3 +81,25 @@ sudo kubectl get all -A
 # Verify nodes
 sudo kubectl get nodes
 ```
+
+## Part 3: Install common tools
+
+```bash
+# Install krew. Ref: https://krew.sigs.k8s.io/docs/user-guide/setup/install/
+
+# Install tree
+kubectl krew install tree
+# To use tree, enable metrics server. Refer to kubeadm_metrics_server.md
+# Use tree to show all the child components of a deployment
+kubectl tree deploy <deployment-name>
+
+# Install ctx, ns
+kubectl krew install ctx
+kubectl krew install ns
+# List down all context
+kubectl ctx
+# List down all ns
+kubectl ns
+# Get current ns
+kubectl ns -c
+```
