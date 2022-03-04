@@ -261,3 +261,42 @@ spec:
 # Common secret type 2: TLS - provded for user's convenience, to ensure the consistency
 # of Secret format.
 ```
+
+## Network Policy
+
+```yaml
+# Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+# NetworkPolicy is not enabled in minikube, even in some cloud env
+# Example
+# deny-all.yaml: This denies all the traffic between pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# allow-blue.yaml: This allows traffic from pod with label app=shell
+# to pod with label colour=blue on port 8080 with TCP protocol
+# policyTypes=ingress/egress: defines allowed direction of traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-blue
+spec:
+  podSelector:
+    matchLabels:
+      colour: blue
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: shell
+      ports:
+        - protocol: TCP
+          port: 8080
+```
