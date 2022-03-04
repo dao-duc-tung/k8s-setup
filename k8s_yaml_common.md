@@ -29,9 +29,7 @@ spec:
           port: 8080
         initialDelaySeconds: 1
         periodSeconds: 1
-```
-
-```yaml
+---
 # readinessProbe: to check ready status
 # This is not used to restart the container, but to not assign IP to the pod
 # Use case 1: when the container is not dead, but it's not ready due to some reasons
@@ -109,9 +107,7 @@ spec:
             matchLabels:
               app: cache
           topologyKey: kubernetes.io/hostname
-```
-
-```yaml
+---
 # Pod anti-affinity: to spread the pod far from others (based on node, zone, etc)
 # Below example shows that the pod wants to be far to pods that have label app=web
 # topologyKey defines the location where the pods are defined as "far"
@@ -128,9 +124,7 @@ spec:
       topologyKey: topology.kubernetes.io/zone
       maxSkew: 1
       whenUnsatisfiable: ScheduleAnyway
-```
-
-```yaml
+---
 # Node affinity: to put a pod to specific nodes
 # Below example shows that the pod wants to be in the node with name in ["big-gpu", "expensive-gpu"]
 # Use case: to put a pod with special jobs in special nodes that have special hardware or sth
@@ -144,9 +138,7 @@ spec:
               - key: kubernetes.io/hostname
                 operator: In
                 values: ["big-gpu", "expensive-gpu"]
-```
-
-```yaml
+---
 # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 # Node anti-affinity: to tell pods to stay away from specific nodes for some reasons
 # Doing this by "taint"-ing a node: kubectl taint nodes node1 key1=value1:NoSchedule
@@ -197,4 +189,66 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+```
+
+## ConfigMap
+
+```yaml
+# Ref: https://kubernetes.io/docs/concepts/configuration/configmap/
+# Example 1: Load key's value of ConfigMap
+# colour-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: colour-config
+data:
+  colour: pink
+---
+# pink.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pink
+spec:
+  containers:
+    - name: pink
+      image: mtinside/blue-green:blue
+      env:
+        - name: COLOUR
+          valueFrom:
+            configMapKeyRef:
+              name: colour-config
+              key: colour
+---
+# Example 2: Load files from ConfigMap
+# website-configmap.yaml, created by running
+# kubectl create configmap website --from-file=index.html --dry-run -o yaml > website-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: website
+data:
+  index.html:
+    "<html>\n    <head></head>\n    <body>\n        <p>Hello from Matt!
+    \U0001F44B</p>\n    </body>\n</html>\n"
+---
+# web.yaml
+# Use spec.volumes.configMap to mount files
+# Each key is one file
+# Key is filename, value is its content
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web
+spec:
+  containers:
+    - name: web
+      image: nginx:1.18.0
+      volumeMounts:
+        - name: website-volume
+          mountPath: /usr/share/nginx/html
+  volumes:
+    - name: website-volume
+      configMap:
+        name: website
 ```

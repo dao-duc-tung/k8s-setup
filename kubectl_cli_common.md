@@ -68,3 +68,12 @@ kubectl rollout undo deploy/<deploy-name>
 kubectl rollout undo deploy/<deploy-name> --to-revision=<number>
 # You cannot rollback a paused Deployment until you resume it.
 ```
+
+## ConfigMap
+
+[ConfigMap document](https://kubernetes.io/docs/concepts/configuration/configmap/)
+
+```bash
+# Create configmap from file by using imperative command, useful for big files
+kubectl create configmap <configmap-name> --from-file=<path-to-file> --dry-run -o yaml > <filename>.yaml
+```
