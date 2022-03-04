@@ -36,6 +36,8 @@ spec:
 # e.g: lose connection with database/servers, something inside is broken temporarily
 # This error will persist forever without restarting the container until we do something
 # Use case 2: when the container takes time to initialize some tasks
+# Note: when rolling out a new version of an image, k8s waits for readinessProbe
+# to declare one Pod upgraded and move onto the next Pod.
 spec:
   containers:
     - name: envbin
@@ -255,18 +257,17 @@ spec:
 
 ## Secret
 
-```yaml
-# Ref: https://kubernetes.io/docs/concepts/configuration/secret/
-# Common secret type 1: Generic - use it same as ConfigMap
-# Common secret type 2: TLS - provded for user's convenience, to ensure the consistency
-# of Secret format.
-```
+- [Secret document](https://kubernetes.io/docs/concepts/configuration/secret/)
+- Common secret type 1: Generic - use it same as ConfigMap
+- Common secret type 2: TLS - provded for user's convenience, to ensure the consistency of Secret format by enforcing extra semantic validation over the values.
 
 ## Network Policy
 
 ```yaml
 # Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
 # NetworkPolicy is not enabled in minikube, even in some cloud env
+# When you define at least 1 NetworkPolicy, you have triggered the whole cluster
+# to deny the communication between pods by default.
 # Example
 # deny-all.yaml: This denies all the traffic between pods
 apiVersion: networking.k8s.io/v1
@@ -299,4 +300,95 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+```
+
+## Controlling access
+
+- [Controlling access document](https://kubernetes.io/docs/concepts/security/controlling-access/)
+- Authentication:
+  - Input: entire HTTP request
+  - Job: examines the headers and/or client certificate, password, plain tokens, boostrap tokens, and JSON Web Tokens (used for service accounts). Multiple authentication modules can be specified and are tried in sequence until one of them succeeds.
+- Authorization:
+  - Input: request with username, requested action, object affected by the action
+  - Job: examines if an existing policy declares that the user has permissions to complete the requested action. If more than one authorization modules are configured, k8s checks each module. If any module authorizes the request, then the request can proceed.
+  - Example module: ABAC, RBAC, Webhook.
+- Admission control:
+  - Input: requests
+  - Job: modify and reject requests, access contents of the created/modified objects. Unlike 2 above modules, if any admission controller module rejects, then the request is immediately rejected.
+
+## Role-based access control (RBAC)
+
+- [RBAC Authorization document](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+- Role-based access control (RBAC) is a method of regulating access to computer or network resources based on the roles of individual users within your organization.
+
+```yaml
+# service-acc.yaml
+# Use kind 'ServiceAccount' to create a service account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: envbin
+---
+# envbin.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: envbin-sa
+spec:
+  # If not specified, serviceAccount will be 'default' with no permission
+  serviceAccount: envbin
+  containers:
+    - name: envbin-sa
+      image: mtinside/envbin:latest
+---
+# rbac.yaml
+# Use kind 'Role' to create a set of permissions for Pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
+---
+# Use kind 'ClusterRole' to create a set of permissions for Nodes
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: node-reader
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["nodes"]
+    verbs: ["get", "watch", "list"]
+---
+# Use kind 'RoleBinding' to bind a Role with a service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: envbin-read-pods
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: envbin
+    namespace: default
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+# Use kind 'ClusterRoleBinding' to bind a ClusterRole with a service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: envbin-read-nodes
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: envbin
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: node-reader
+  apiGroup: rbac.authorization.k8s.io
 ```
