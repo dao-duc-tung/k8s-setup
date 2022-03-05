@@ -397,22 +397,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-## Service mesh
-
-- [Kubernetes Service Mesh: A Comparison of Istio, Linkerd, and Consul](https://platform9.com/blog/kubernetes-service-mesh-a-comparison-of-istio-linkerd-and-consul/)
-- [Linkerd Service mesh](https://linkerd.io/what-is-a-service-mesh/)
-
-```bash
-# Run this to check how linkerd inject YAML
-cat <yaml-file> | linkerd inject --manual -
-
-# Instead, run this to enable linkerd injection every time we deploy a pod in namespace 'default'
-# linkerd intercepts the processing of creating the pod and inject some YAML into the pod's yaml
-# before passing to k8s
-kubectl annotate namespace default linkerd.io/inject=enabled
-kubectl annotate namespace default linkerd.io/inject=disabled --overwrite
-```
-
 ## Custom resource definition (CRD)
 
 - [CRD document](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
