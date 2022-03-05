@@ -1,5 +1,24 @@
 # Kubernetes
 
+## Part 0: Personal and Production clusters
+
+### Personal cluster
+
+- [minikube](https://minikube.sigs.k8s.io/docs/)
+- Kubernetes through Docker desktop
+- [kind](https://kind.sigs.k8s.io/): design for k8s team own internal development and testing. It's meant to run in the k8s CI system.
+- [microk8s](https://microk8s.io/docs)
+- [k3s](https://rancher.com/docs/k3s/latest/en/)
+
+**Note**: personal cluster is likely to be 2 or 3 versions, or 6-month ahead of the production cluster.
+
+### Production cluster
+
+- Self-mananed (DIY): setup everything from scratch. Check out [Kubernetes The Hard Way by Kelsey Hightower]()
+- Managed install: deploy cluster on a Linux system. Eg: [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)
+- Managed deploy: deploy cluster on cloud. Eg: [kOps](https://kops.sigs.k8s.io/)
+- Fully-managed: cloud provider installs and operates k8s for you with the help of automated scripts and experts. Eg: GKE, AKS, EKS, IKS.
+
 ## Part 1: Install kubectl, kubeadm, kubelet
 
 [General instruction from Kubernetes](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
@@ -393,235 +412,4 @@ To troubleshoot/check error of the metrics server, run:
 kubectl describe apiservice v1beta1.metrics.k8s.io
 # Check the Status field
 # Note: name v1beta1.metrics.k8s.io get from the above yaml file, in APIService component
-```
-
-### Helm
-
-- [Helm document](https://helm.sh/docs/)
-- Helm is for the services that you own where you can control everything (YAML, resources, environments between services, etc). People usually just make one yaml template for a service, and have different values.yaml for different services.
-
-```bash
-# Install Helm. Ref: https://helm.sh/docs/intro/install/
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-# Setup helm folder
-helm
-│   Chart.yaml
-│   values-dev.yaml
-│   values-prod.yaml
-│
-└───templates
-        deployment.yaml
-        ingress.yaml
-        service.yaml
-```
-
-```yaml
-# Chart.yaml
-apiVersion: v2
-name: blue-green
-description: An a/b test
-version: 1.0.0 # chart version
----
-# values-dev.yaml
-host: dev.example.com
-tls:
-  enabled: false
----
-# values-prod.yaml
-host: prod.example.com
-tls:
-  enabled: true
----
-# ingress.yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: blue-green
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    {{- if .Values.tls.enabled }}
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    {{- end }}
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: {{ .Values.host }}
-      http:
-        paths:
-          - path: /blue-green
-            pathType: Prefix
-            backend:
-              service:
-                name: blue-green
-                port:
-                  number: 80
-  {{- if .Values.tls.enabled }}
-  tls:
-    - hosts:
-        - {{ .Values.host }}
-      secretName: blue-green-prod-tls
-  {{- end }}
-```
-
-```bash
-# Merge values with templates
-helm template -f values-dev.yaml .
-# Merge and install (apply)
-helm install -f values-dev.yaml blue-green . # blue-green is name
-# If we remove service.yaml, and run
-helm upgrade -f values-dev.yaml blue-green .
-# Helm will remove the service, because it tracks objects in history
-
-# Check history
-helm history blue-green
-# Helm supports rollback to the previous revision
-```
-
-### Kustomize
-
-- [Kustomize document](https://kubectl.docs.kubernetes.io/)
-- Kustomize is for services you don't own (3rd-party apps). They usually provide large reference YAMLs and you want to make a few little tweaks. You want to use Kustomize to write your patches, while letting the 3rd-party apps maintain the base YAMLs.
-
-```bash
-# Kustomize is already installed with kubectl
-
-# Setup kustomize folder
-kustomize
-├───base
-│       deployment.yaml
-│       ingress.yaml
-│       kustomization.yaml
-│       service.yaml
-│
-└───overlays
-    └───prod
-            ingress-patch-hostname.yaml
-            ingress.yaml
-            issuer-le-prod.yaml
-            issuer-le-staging.yaml
-            kustomization.yaml
-```
-
-```yaml
-# base/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-commonLabels:
-  app: blue-green
-
-namespace: blue-green
-
-resources:
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
----
-# base/ingress.yaml
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: blue-green
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-spec:
-  rules:
-    - host: dev.example.com
-      http:
-        paths:
-          - path: /blue-green
-            backend:
-              serviceName: blue-green
-              servicePort: 80
----
-# overlays/prod/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-# These apply to the new resources in this overlay; the base's settings don't apply here.
-# If these are different to the base, they're override it
-commonLabels:
-  app: blue-green
-
-# ditto commonLabels
-namespace: blue-green
-
-bases:
-  - ../../base
-
-resources:
-  - issuer-le-staging.yaml
-  - issuer-le-prod.yaml
-
-patchesStrategicMerge:
-  - ingress.yaml
-patchesJson6902:
-  - target:
-      group: networking.k8s.io
-      version: v1beta1
-      kind: Ingress
-      name: blue-green
-    path: ingress-patch-hostname.yaml
----
-# overlays/prod/ingress.yaml
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: blue-green
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-spec:
-  tls:
-    - hosts:
-        - prod.example.com
-      secretName: blue-green-prod-tls
----
-# overlays/prod/ingress-patch-hostname.yaml
-- op: replace
-  path: /spec/rules/0/host
-  value: prod.example.com
-```
-
-```bash
-# generate yaml in base
-kubectl kustomize base
-# apply
-kubectl apply -K base
-# generate yaml in overlays/prod
-kubectl kustomize overlays/prod
-```
-
-### Other tools
-
-```bash
-# Install krew. Ref: https://krew.sigs.k8s.io/docs/user-guide/setup/install/
-
-# Install tree
-kubectl krew install tree
-# To use tree, enable metrics server. Refer to kubeadm_metrics_server.md
-# Use tree to show all the child components of a deployment
-kubectl tree deploy <deployment-name>
-
-# Install ctx, ns
-kubectl krew install ctx
-kubectl krew install ns
-# List down all context
-kubectl ctx
-# List down all ns
-kubectl ns
-# Get current ns
-kubectl ns -c
-
-# Install service mesh linkerd. Ref: https://linkerd.io/2.11/getting-started/#
-curl --proto '=https' --tlsv1.2 -sSfL https://run.linkerd.io/install | sh
-# Add linkerd to PATH
-linkerd version
-linkerd check --pre
-linkerd install | kubectl apply -f -
-linkerd check
-# Install linkerd dashboard
-linkerd viz install | kubectl apply -f -
-linkerd viz check
-linkerd viz dashboard
 ```
