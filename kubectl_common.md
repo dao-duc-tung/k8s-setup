@@ -181,9 +181,9 @@ kubectl debug node/<node-name> -it --image=ubuntu
 kubectl delete pod <debug-pod-name>
 ```
 
-### Debug trick
+## Debug trick
 
-#### Using nixery.dev image
+### Using nixery.dev image
 
 ```bash
 # Instead of using busybox, ubuntu, etc with limited tools, use nixery.dev as the debug image
@@ -192,7 +192,7 @@ kubectl debug <pod-name> -it --image=nixery.dev/shell/curl/wget/htop --target=<p
 kubectl debug <pod-name> -it --image=nixery.dev/shell/curl/wget/htop --share-processes --copy-to=<debug-pod-name>
 ```
 
-#### Using sniff
+### Using sniff
 
 This `sniff` tool will open Wireshark software which is meant to use with GUI. Wireshark will help to track all the traffic in/out of a container in a pod.
 
@@ -202,4 +202,89 @@ This `sniff` tool will open Wireshark software which is meant to use with GUI. W
 kubectl krew install sniff
 # sniff a container
 kubectl sniff <pod-name> -n <namespace> -c <container-name>
+```
+
+### Using Skaffold
+
+To develop quickly and efficiently, we don't want to go through the whole loop of developing a program including editing it, building it, making a Docker image, pushing that, rolling out, restart on the deployment, change the label in deployment, wait for the deployment to roll something out.
+
+Instead, [Skaffold](https://skaffold.dev/docs/) handles the workflow for building, pushing, and deploying your application, and provides building blocks for creating CI/CD pipelines. This enables you to focus on iterating on your application locally while Skaffold continuously deploys to your local or remote Kubernetes cluster.
+
+```bash
+# Install Skaffold
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+sudo install skaffold /usr/local/bin/
+```
+
+#### Demo
+
+This is a simple example based on:
+
+- **building** a single Go file app and with a multistage `Dockerfile` using local docker to build
+- **tagging** using the default tagPolicy (`gitCommit`)
+- **deploying** a single container pod using `kubectl`
+
+```yaml
+# skaffold.yaml
+apiVersion: skaffold/v2beta5
+kind: Config
+build:
+  artifacts:
+    - image: skaffold-example
+deploy:
+  kubectl:
+    manifests:
+      - k8s-*
+---
+# k8s-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: getting-started
+spec:
+  containers:
+    - name: getting-started
+      image: skaffold-example
+```
+
+```dockerfile
+FROM golang:1.12.9-alpine3.10 as builder
+COPY main.go .
+RUN go build -o /app main.go
+
+FROM alpine:3.10
+# Define GOTRACEBACK to mark this container as using the Go language runtime
+# for `skaffold debug` (https://skaffold.dev/docs/workflows/debug/).
+ENV GOTRACEBACK=single
+CMD ["./app"]
+COPY --from=builder /app .
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	for {
+		fmt.Println("Hello world!")
+
+		time.Sleep(time.Second * 1)
+	}
+}
+```
+
+Run:
+
+```bash
+# continuous build & deploy on code changes
+skaffold dev
+# check pod in a new terminal
+kubectl get pod
+# change main.go code, skaffold detects the change and redeploy the pod
+# check pod
+kubectl get pod
 ```
