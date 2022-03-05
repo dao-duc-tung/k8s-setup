@@ -103,3 +103,103 @@ kubectl rollout undo deploy/<deploy-name> --to-revision=<number>
 # Create configmap from file by using imperative command, useful for big files
 kubectl create configmap <configmap-name> --from-file=<path-to-file> --dry-run -o yaml > <filename>.yaml
 ```
+
+## Debug running pod
+
+- [Debug running pod document](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-running-pod/)
+
+### 1. Debug with container exec
+
+```bash
+kubectl exec -it <pod-name> -- sh
+# or attach to a pod
+kubectl attach <pod-name> -it -c <container-name>
+# List down all process
+ps faux
+```
+
+### 2. Debug with an ephemeral debug container
+
+[Ephemeral containers](https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/) are useful for interactive troubleshooting when kubectl exec is insufficient because a container has crashed or a container image doesn't include debugging utilities (shell), such as with distroless images. One problem is that, like regular containers, you may not change or remove an ephemeral container after you have added it to a Pod.
+
+```bash
+# process-namespace is the name of the main process which runs in the pod, usually the main container name
+kubectl debug <pod-name> -it --image=busybox --target=<process-namespace>
+# check added ephemeral containers
+kubectl describe pod <pod-name>
+```
+
+### 3. Debug using a copy of the pod
+
+Sometimes Pod configuration options make it difficult to troubleshoot in certain situations. For example, you can't run kubectl exec to troubleshoot your container if your container image does not include a shell or if your application crashes on startup. In these situations you can use kubectl debug to create a copy of the Pod with configuration values changed to aid debugging.
+
+#### 3.1. Copy a pod while adding a new container
+
+Adding a new container can be useful when your application is running but not behaving as you expect and you'd like to add additional troubleshooting utilities to the Pod.
+
+```bash
+# -i flag causes 'kubectl debug' to attach to the new container by default
+# you can prevent this by specifying --attach=false
+# --share-processes allows the containers in this pod to see processes
+# from the other containers in the pod
+kubectl debug <pod-name> -it --image=ubuntu --share-processes --copy-to=<debug-pod-name>
+# delete debugging pod
+kubectl delete pod <debug-pod-name>
+```
+
+#### 3.2. Copy a pod while changing its command
+
+Sometimes it's useful to change the command for a container, for example to add a debugging flag or because the application is crashing.
+
+```bash
+# To change the command of a specific container, you must specifying its name using --container
+kubectl debug <pod-name> -it --copy-to=<debug-pod-name> --container=<container-name> -- sh
+# delete debugging pod
+kubectl delete pod <debug-pod-name>
+```
+
+#### 3.3. Copy a pod while changing container images
+
+In some situations you may want to change a misbehaving Pod from its normal production container images to an image containing a debugging build or additional utilities.
+
+```bash
+# --set-image uses the same 'container_name=image' syntax as kubectl set image . *=ubuntu
+# This changes the image of all containers to ubuntu
+kubectl debug <pod-name> -it --copy-to-<debug-pod-name> --set-image=*=ubuntu
+# delete debugging pod
+kubectl delete pod <debug-pod-name>
+```
+
+### 4. Debug via a shell on the node
+
+If none of these approaches work, you can find the Node on which the Pod is running and create a privileged Pod running in the host namespaces.
+
+```bash
+# To create an interactive shell on a node using kubectl debug:
+kubectl debug node/<node-name> -it --image=ubuntu
+# delete debugging pod
+kubectl delete pod <debug-pod-name>
+```
+
+### Debug trick
+
+#### Using nixery.dev image
+
+```bash
+# Instead of using busybox, ubuntu, etc with limited tools, use nixery.dev as the debug image
+# the list of tools behind nixery.dev will be installed on the fly
+kubectl debug <pod-name> -it --image=nixery.dev/shell/curl/wget/htop --target=<process-namespace>
+kubectl debug <pod-name> -it --image=nixery.dev/shell/curl/wget/htop --share-processes --copy-to=<debug-pod-name>
+```
+
+#### Using sniff
+
+This `sniff` tool will open Wireshark software which is meant to use with GUI. Wireshark will help to track all the traffic in/out of a container in a pod.
+
+```bash
+# Install Wireshark first
+# Install sniff
+kubectl krew install sniff
+# sniff a container
+kubectl sniff <pod-name> -n <namespace> -c <container-name>
+```

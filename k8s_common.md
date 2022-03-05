@@ -410,6 +410,7 @@ cat <yaml-file> | linkerd inject --manual -
 # linkerd intercepts the processing of creating the pod and inject some YAML into the pod's yaml
 # before passing to k8s
 kubectl annotate namespace default linkerd.io/inject=enabled
+kubectl annotate namespace default linkerd.io/inject=disabled --overwrite
 ```
 
 ## Custom resource definition (CRD)
