@@ -210,10 +210,11 @@ To develop quickly and efficiently, we don't want to go through the whole loop o
 
 Instead, [Skaffold](https://skaffold.dev/docs/) handles the workflow for building, pushing, and deploying your application, and provides building blocks for creating CI/CD pipelines. This enables you to focus on iterating on your application locally while Skaffold continuously deploys to your local or remote Kubernetes cluster.
 
+Ref: [Skaffold yaml syntax](https://skaffold-latest.firebaseapp.com/docs/references/yaml/)
+
 ```bash
 # Install Skaffold
-curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
-sudo install skaffold /usr/local/bin/
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && sudo install skaffold /usr/local/bin/
 ```
 
 #### Demo
@@ -226,11 +227,13 @@ This is a simple example based on:
 
 ```yaml
 # skaffold.yaml
-apiVersion: skaffold/v2beta5
+apiVersion: skaffold/v2beta26
 kind: Config
 build:
   artifacts:
     - image: skaffold-example
+  local:
+    push: false # Don't push image to registry
 deploy:
   kubectl:
     manifests:
@@ -248,6 +251,7 @@ spec:
 ```
 
 ```dockerfile
+# Dockerfile
 FROM golang:1.12.9-alpine3.10 as builder
 COPY main.go .
 RUN go build -o /app main.go
@@ -261,6 +265,7 @@ COPY --from=builder /app .
 ```
 
 ```go
+// main.go
 package main
 
 import (
