@@ -362,6 +362,8 @@ kubectl get pod
 
 ## Prometheus
 
+### Install
+
 There're few ways to install Prometheus:
 
 - As a single binary running on your hosts
@@ -375,6 +377,7 @@ Some tutorials:
 - [2022-01-28 - How to Setup Prometheus Monitoring On Kubernetes Cluster](https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/)
 - [2021-08-31 - Prometheus Definitive Guide Part III - Prometheus Operator](https://www.infracloud.io/blogs/prometheus-operator-helm-guide/)
 - [2021-02-16 - Kubernetes monitoring with Prometheus, the ultimate guide](https://sysdig.com/blog/kubernetes-monitoring-prometheus/)
+- [Prometheus document](https://prometheus.io/docs/prometheus/latest/getting_started/)
 
 ```bash
 # Install using Prometheus Operator
@@ -393,6 +396,18 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 # Replace '[RELEASE_NAME]' by 'prometheus'
 helm install [RELEASE_NAME] prometheus-community/kube-prometheus-stack
+```
+
+### Access GUI
+
+```bash
+# For installation using Helm chart
+# Access Prometheus dashboard
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090
+# Access Alert Manager dashboard
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9093
+# Access Grafana dashboard, username: admin, password: prom-operator
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 3000:80
 ```
 
 ## Other tools
