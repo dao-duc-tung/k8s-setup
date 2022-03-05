@@ -22,6 +22,9 @@ kubectl get ds
 kubectl get apiservice
 kubectl get crd
 
+# debug pod error/status
+kubectl describe pod <pod-name> -n <namespace>
+
 # watch the change of deploy
 watch kubectl get pod
 watch kubectl get deploy

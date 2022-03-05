@@ -48,6 +48,10 @@ cat <yaml-file> | linkerd inject --manual -
 # before passing to k8s
 kubectl annotate namespace default linkerd.io/inject=enabled
 kubectl annotate namespace default linkerd.io/inject=disabled --overwrite
+
+# Uninstall
+linkerd viz uninstall | kubectl delete -f -
+linkerd uninstall | kubectl delete -f -
 ```
 
 ## Helm
@@ -124,13 +128,20 @@ spec:
 helm template -f values-dev.yaml .
 # Merge and install (apply)
 helm install -f values-dev.yaml blue-green . # blue-green is name
-# If we remove service.yaml, and run
+# Check svc
+kubectl get svc
+# Remove service.yaml, and run
 helm upgrade -f values-dev.yaml blue-green .
+# Check svc
+kubectl get svc
 # Helm will remove the service, because it tracks objects in history
 
 # Check history
 helm history blue-green
 # Helm supports rollback to the previous revision
+
+# Delete resources
+helm delete blue-green
 ```
 
 ## Kustomize
@@ -347,6 +358,41 @@ kubectl get pod
 # change main.go code, skaffold detects the change and redeploy the pod
 # check pod
 kubectl get pod
+```
+
+## Prometheus
+
+There're few ways to install Prometheus:
+
+- As a single binary running on your hosts
+- As a Docker container
+- Using Prometheus Operator: not entire monitoring stack
+- Using kube-prometheus: provision an entire monitoring stack
+- Using Helm chart: provides similar feature set to kube-prometheus
+
+Some tutorials:
+
+- [2022-01-28 - How to Setup Prometheus Monitoring On Kubernetes Cluster](https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/)
+- [2021-08-31 - Prometheus Definitive Guide Part III - Prometheus Operator](https://www.infracloud.io/blogs/prometheus-operator-helm-guide/)
+- [2021-02-16 - Kubernetes monitoring with Prometheus, the ultimate guide](https://sysdig.com/blog/kubernetes-monitoring-prometheus/)
+
+```bash
+# Install using Prometheus Operator
+# Ref: https://github.com/prometheus-operator/prometheus-operator
+# Use 'create' instead of 'apply'
+# Large annotation size is the issue for 'kubectl apply' since it stores last applied config
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
+
+# Install using kube-prometheus: Follow the instruction in its Github
+# Ref: https://github.com/prometheus-operator/kube-prometheus
+# Tried but got error Insufficient CPU (not common) for pod prometheus-k8s-0 and prometheus-k8s-0
+# maybe this can work on another machine
+
+# Install using Helm chart. Ref: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+# Replace '[RELEASE_NAME]' by 'prometheus'
+helm install [RELEASE_NAME] prometheus-community/kube-prometheus-stack
 ```
 
 ## Other tools
