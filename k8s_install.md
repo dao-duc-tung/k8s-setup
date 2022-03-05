@@ -397,6 +397,9 @@ kubectl describe apiservice v1beta1.metrics.k8s.io
 
 ### Helm
 
+- [Helm document](https://helm.sh/docs/)
+- Helm is for the services that you own where you can control everything (YAML, resources, environments between services, etc). People usually just make one yaml template for a service, and have different values.yaml for different services.
+
 ```bash
 # Install Helm. Ref: https://helm.sh/docs/intro/install/
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
@@ -473,6 +476,120 @@ helm upgrade -f values-dev.yaml blue-green .
 # Check history
 helm history blue-green
 # Helm supports rollback to the previous revision
+```
+
+### Kustomize
+
+- [Kustomize document](https://kubectl.docs.kubernetes.io/)
+- Kustomize is for services you don't own (3rd-party apps). They usually provide large reference YAMLs and you want to make a few little tweaks. You want to use Kustomize to write your patches, while letting the 3rd-party apps maintain the base YAMLs.
+
+```bash
+# Kustomize is already installed with kubectl
+
+# Setup kustomize folder
+kustomize
+├───base
+│       deployment.yaml
+│       ingress.yaml
+│       kustomization.yaml
+│       service.yaml
+│
+└───overlays
+    └───prod
+            ingress-patch-hostname.yaml
+            ingress.yaml
+            issuer-le-prod.yaml
+            issuer-le-staging.yaml
+            kustomization.yaml
+```
+
+```yaml
+# base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonLabels:
+  app: blue-green
+
+namespace: blue-green
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+---
+# base/ingress.yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: blue-green
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: dev.example.com
+      http:
+        paths:
+          - path: /blue-green
+            backend:
+              serviceName: blue-green
+              servicePort: 80
+---
+# overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# These apply to the new resources in this overlay; the base's settings don't apply here.
+# If these are different to the base, they're override it
+commonLabels:
+  app: blue-green
+
+# ditto commonLabels
+namespace: blue-green
+
+bases:
+  - ../../base
+
+resources:
+  - issuer-le-staging.yaml
+  - issuer-le-prod.yaml
+
+patchesStrategicMerge:
+  - ingress.yaml
+patchesJson6902:
+  - target:
+      group: networking.k8s.io
+      version: v1beta1
+      kind: Ingress
+      name: blue-green
+    path: ingress-patch-hostname.yaml
+---
+# overlays/prod/ingress.yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: blue-green
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - prod.example.com
+      secretName: blue-green-prod-tls
+---
+# overlays/prod/ingress-patch-hostname.yaml
+- op: replace
+  path: /spec/rules/0/host
+  value: prod.example.com
+```
+
+```bash
+# generate yaml in base
+kubectl kustomize base
+# apply
+kubectl apply -K base
+# generate yaml in overlays/prod
+kubectl kustomize overlays/prod
 ```
 
 ### Other tools
