@@ -662,6 +662,6 @@ helm uninstall prometheus -n prometheus
 ## Clean resources
 
 ```bash
-eksctl delete nodegroup --cluster <cluster-name> <node-group-name>
+eksctl delete iamserviceaccount --cluster=<cluster-name> --namespace=<namespace> --name=aws-load-balancer-controller
 eksctl delete cluster --name <cluster-name>
 ```
