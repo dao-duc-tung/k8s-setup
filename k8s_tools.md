@@ -396,6 +396,8 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 # Replace '[RELEASE_NAME]' by 'prometheus'
 helm install [RELEASE_NAME] prometheus-community/kube-prometheus-stack
+# Clean resources
+helm delete [RELEASE_NAME]
 ```
 
 ### Access GUI

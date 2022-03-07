@@ -103,6 +103,21 @@ sudo kubectl get nodes
 
 ## Part 3: Install common tools
 
+### Helper tools
+
+```bash
+# Install jq, envsubst (from GNU gettext utilities) and bash-completion
+sudo yum -y install jq gettext bash-completion moreutils
+# Install yq for yaml processing
+echo 'yq() {
+  docker run --rm -i -v "${PWD}":/workdir mikefarah/yq "$@"
+}' | tee -a ~/.bashrc && source ~/.bashrc
+# Enable kubectl bash_completion
+kubectl completion bash >>  ~/.bash_completion
+. /etc/profile.d/bash_completion.sh
+. ~/.bash_completion
+```
+
 ### Kubernetes dashboard
 
 ```bash
@@ -365,7 +380,7 @@ docker container stop <container_id>
 
 ### Metrics server using kubeadm
 
-If you just install [metrics server](https://github.com/kubernetes-sigs/metrics-server) by running this command
+In your local cluster, if you just install [metrics server](https://github.com/kubernetes-sigs/metrics-server) by running this command
 
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
@@ -377,7 +392,7 @@ you will most likely get this error
 Error from server (ServiceUnavailable): the server is currently unable to handle the request (get pods.metrics.k8s.io)
 ```
 
-The reason is because kubelet certificate needs to be signed by cluster Certificate Authority (or disable certificate validation by passing `--kubelet-insecure-tls` to Metrics Server). This is stated in the [requirements of the metrics server](https://github.com/kubernetes-sigs/metrics-server#requirements).
+The reason is because kubelet certificate needs to be signed by cluster Certificate Authority (or disable certificate validation by passing `--kubelet-insecure-tls` to Metrics Server). This is stated in the [requirements of the metrics server](https://github.com/kubernetes-sigs/metrics-server#requirements). Note that, for cloud based cluster, there's no need to do this.
 
 To fix this, we download the yaml file from:
 

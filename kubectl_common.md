@@ -12,6 +12,7 @@ kubectl api-resources | grep apps | less # to show less
 kubectl api-resources | grep apps | less -S # to chop long lines
 
 # Get common resources
+kubectl get all
 kubectl get pod
 kubectl get svc
 kubectl get deploy
