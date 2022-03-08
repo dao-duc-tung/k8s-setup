@@ -1,4 +1,6 @@
-# Kubernetes common yaml
+# Kubernetes common resources
+
+This document describes how to work with common k8s resources.
 
 ## General
 

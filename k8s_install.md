@@ -1,5 +1,7 @@
 # Kubernetes
 
+This document describes steps to install k8s and setup helper tools.
+
 ## Part 0: Personal and Production clusters
 
 ### Personal cluster

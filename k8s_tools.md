@@ -1,5 +1,7 @@
 # Kubernetes tools
 
+This document describes steps to install and use some tools in k8s.
+
 ## Krew, tree, ctx, ns
 
 ```bash

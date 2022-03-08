@@ -1,17 +1,19 @@
 # Elastic Kubernetes Service (EKS)
 
-- EKS fully manages the k8s cluster for us and provide EC2 or Fargate instances as worker nodes or pods, respectively. We can use both at the same time, in the same cluster.
+This document describes several steps to use EKS for beginner level. This document is based on the course [Running Kubernetes on AWS (EKS) on Linkedin Learning](https://www.linkedin.com/learning/running-kubernetes-on-aws-eks/).
 
-  - EC2
-    - Compute as a Service
-    - Supports > 4vCPU, 30GB per Pod, SSD/managed IOPS local storage, GPU
-  - Fargate
-    - Container as a Service
-    - Adds a profile (namespace + label) to map Pod -> ECS profile
-    - No node management, usually no set scale limits, no need to scale out workers, only pay for active pods, not active node
-    - Supports 0.5 - 4vCPU, no GPU
-    - Container service needs to map to Farget CPU or memory tier. This mapping is based on largest sum of resources (init vs. non-init containers) and consumes 250m cores + 512Mi memory
-  - Conclusion: EC2 = Flexibility, Fargate = Less management
+EKS fully manages the k8s cluster for us and provide EC2 or Fargate instances as worker nodes or pods, respectively. We can use both at the same time, in the same cluster.
+
+- EC2
+  - Compute as a Service
+  - Supports > 4vCPU, 30GB per Pod, SSD/managed IOPS local storage, GPU
+- Fargate
+  - Container as a Service
+  - Adds a profile (namespace + label) to map Pod -> ECS profile
+  - No node management, usually no set scale limits, no need to scale out workers, only pay for active pods, not active node
+  - Supports 0.5 - 4vCPU, no GPU
+  - Container service needs to map to Farget CPU or memory tier. This mapping is based on largest sum of resources (init vs. non-init containers) and consumes 250m cores + 512Mi memory
+- Conclusion: EC2 = Flexibility, Fargate = Less management
 
 - Checkout [EKS Quickstart](https://aws-quickstart.github.io/quickstart-amazon-eks/) for users who are looking for a repeatable, customizable reference deployment for Amazon EKS using AWS CloudFormation
 

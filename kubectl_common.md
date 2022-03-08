@@ -1,5 +1,7 @@
 # Kubectl common cli
 
+This document describes common `kubectl` commands.
+
 ## General
 
 - [kubectl cheat sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
