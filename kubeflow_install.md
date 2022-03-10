@@ -1,12 +1,12 @@
 # Kubeflow
 
-This document describes steps to install kubeflow.
+This document describes steps to install Kubeflow.
 
 [General instruction from a Medium post](https://medium.com/@andrei.benea/setting-up-a-kubeflow-deployment-on-a-kubernetes-cluster-f1f5dc35d46a)
 
 ## Part 1: Install kustomize
 
-[We need a compatible kustomize version for kubeflow.](https://github.com/kubeflow/manifests#installation).
+[We need a compatible kustomize version for Kubeflow.](https://github.com/kubeflow/manifests#installation).
 
 ```bash
 # Install kustomize. Ref: https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/

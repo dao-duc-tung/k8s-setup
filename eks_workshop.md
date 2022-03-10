@@ -1,6 +1,6 @@
 # EKS Workshop
 
-This document desribes the content and keywords of the [eksworkshop](https://www.eksworkshop.com/).
+This document desribes the content and keywords of the [eksworkshop](https://www.eksworkshop.com/) for keyword searching convenience purpose.
 
 There's another interesting workshop related to DevOps which is [Blue/Green and Canary deployment for EKS and ECS](https://catalog.us-east-1.prod.workshops.aws/workshops/2175d94a-cd79-4ed2-8e7e-1f0dd1956a3a/en-US).
 
