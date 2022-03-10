@@ -38,7 +38,7 @@ See [k8s_install.md](k8s_install.md). This document describes steps to install k
 1. Personal and Production clusters
 1. Install `kubectl`, `kubeadm`, `kubelet`
 1. Init k8s cluster
-1. Install common tools
+1. Install common tools: `kubectl` bash completion, k8s dashboard, Ingress controller, Ingress type `LoadBalancer`, metrics server.
 
 ## k8s tools
 
