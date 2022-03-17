@@ -4,6 +4,9 @@ This document describes how to work with common k8s resources.
 
 ## General
 
+- [2-minute k8s](https://www.youtube.com/watch?v=PziYflu8cB8)
+- [15-minute k8s](https://www.youtube.com/watch?v=VnvRFRk_51k)
+- [1-hour k8s](https://www.youtube.com/watch?v=s_o8dwzRlu4)
 - [Configuration Best Practices](https://kubernetes.io/docs/concepts/configuration/overview/)
 - [Ports and Protocols](https://kubernetes.io/docs/reference/ports-and-protocols/)
 - [Recommended Labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/)

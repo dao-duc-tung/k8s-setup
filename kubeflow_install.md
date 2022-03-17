@@ -2,7 +2,10 @@
 
 This document describes steps to install Kubeflow.
 
-[General instruction from a Medium post](https://medium.com/@andrei.benea/setting-up-a-kubeflow-deployment-on-a-kubernetes-cluster-f1f5dc35d46a)
+## Reference
+
+- [General instruction from a Medium post](https://medium.com/@andrei.benea/setting-up-a-kubeflow-deployment-on-a-kubernetes-cluster-f1f5dc35d46a)
+- [Kubeflow vs. SageMaker](https://valohai.com/blog/kubeflow-vs-sagemaker/)
 
 ## Part 1: Install kustomize
 
